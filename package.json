@@ -9,15 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fetcch/aptos-pay": "0.0.4",
     "@types/node": "20.8.6",
     "@types/react": "18.2.28",
     "@types/react-dom": "18.2.13",
     "autoprefixer": "10.4.16",
     "next": "13.5.4",
     "postcss": "8.4.31",
+    "qrcode": "^1.5.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-qr-reader": "^3.0.0-beta-1",
     "tailwindcss": "3.3.3",
     "typescript": "5.2.2"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.2"
   }
 }
