@@ -1,7 +1,7 @@
 import { generateUrl, TransferURI } from "@fetcch/aptos-pay";
 import { Inter } from "next/font/google";
 import { useState } from "react";
-import { createCollection } from "../utils/mintNFT";
+import { mintNFT } from "../utils/mintNFT";
 import QRCode from "qrcode";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -22,11 +22,11 @@ export default function Home() {
   const [image, setImage] = useState("");
 
   const generate = async () => {
-    // const mintData = await mintNFT(receiver);
+    const mintData = await mintNFT(receiver);
     const url = generateUrl({
       ...args,
       receiver,
-      //   transaction: mintData,
+      transaction: mintData,
     });
     setUrl(url);
     setImage(await generateQrCode(url));
@@ -54,7 +54,7 @@ export default function Home() {
       {image && <img src={image} />}
       <div
         className="cursor-pointer border p-3 rounded-xl"
-        onClick={() => createCollection()}
+        onClick={() => generate()}
       >
         Generate URL
       </div>
