@@ -20,12 +20,7 @@ const faucetClient = new FaucetClient(
 );
 
 export const createCollection = async () => {
-  const alice = new AptosAccount(
-    Buffer.from(
-      "e74d9065a06ce98e1276ce52cbabb0eef8ea0984e285c1bfa9d8049acdf01b5e",
-      "hex"
-    )
-  );
+  const alice = new AptosAccount();
   const bob = new AptosAccount();
 
   await faucetClient.fundAccount(alice.address(), 100_000_000);
