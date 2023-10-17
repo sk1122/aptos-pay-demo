@@ -1,4 +1,11 @@
-import { decodeTransaction, generateTransferTransaction, parseUrl, TransferURI } from "@fetcch/aptos-pay";
+import {
+  decodeTransaction,
+  generateTransferTransaction,
+  parseUrl,
+  TransferURI,
+} from "@fetcch/aptos-pay";
+import { BCS, TxnBuilderTypes } from "aptos";
+import base58 from "bs58";
 import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import { QrReader } from "react-qr-reader";
@@ -9,7 +16,7 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [image, setImage] = useState("");
   const [parsed, setParsed] = useState<TransferURI>();
-  const [address, setAddress] = useState<any>(undefined)
+  const [address, setAddress] = useState<any>(undefined);
 
   useEffect(() => {
     if (url) {
@@ -21,33 +28,56 @@ export default function Home() {
   }, [url]);
 
   const connectAptos = async () => {
-    const w = window as any
+    const w = window as any;
 
-    await w.aptos.connect()
+    await w.aptos.connect();
 
-    const account = await w.aptos.getAccount()
+    const account = await w.aptos.getAccount();
 
-    setAddress(account)
-  }
+    setAddress(account);
+  };
 
   const pay = async () => {
-    const p = parsed as any
-    const w = window as any
+    const p = parsed as any;
+    const w = window as any;
 
-    if(p.transaction) {
-        const transaction = JSON.parse(decodeTransaction(p.transaction))
+    if (p.transaction) {
+      // const deserializer = new BCS.Deserializer(base58.decode(p.transaction));
+      // const transaction =
+      //   TxnBuilderTypes.RawTransaction.deserialize(deserializer);
+      // console.log(transaction);
+      const transaction = {
+        function: "0x3::token::create_token_script",
+        type_arguments: [],
+        type: "entry_function_payload",
+        arguments: [
+          "FetcchTestCollection",
+          "Fetcch",
+          "Fetcch Test Collection",
+          1,
+          10000000,
+          "https://aptos.dev/img/nyan.jpeg",
+          address.address,
+          0,
+          0,
+          [false, false, false, false, false],
+          [],
+          [],
+          [],
+        ],
+      };
 
-        await w.aptos.signAndSubmitTransaction(transaction)
+      await w.aptos.signAndSubmitTransaction(transaction);
     } else {
-        const transaction = generateTransferTransaction(
-            p.receiver,
-            p.token,
-            p.amount
-        )
+      const transaction = generateTransferTransaction(
+        p.receiver,
+        p.token,
+        p.amount
+      );
 
-        await w.aptos.signAndSubmitTransaction(transaction)
+      await w.aptos.signAndSubmitTransaction(transaction);
     }
-  }
+  };
 
   return (
     <main
@@ -70,10 +100,24 @@ export default function Home() {
       />
       {parsed && <p>Parsed Data - {JSON.stringify(parsed)}</p>}
 
-      {!address && <div className="cursor-pointer border p-3 rounded-xl" onClick={() => connectAptos()}>Connect Petra</div>}
+      {!address && (
+        <div
+          className="cursor-pointer border p-3 rounded-xl"
+          onClick={() => connectAptos()}
+        >
+          Connect Petra
+        </div>
+      )}
       {address && <p>Address - {address.address}</p>}
 
-      {address && url && <div className="cursor-pointer border p-3 rounded-xl" onClick={() => pay()}>Pay</div>}
+      {address && url && (
+        <div
+          className="cursor-pointer border p-3 rounded-xl"
+          onClick={() => pay()}
+        >
+          Pay
+        </div>
+      )}
     </main>
   );
 }
