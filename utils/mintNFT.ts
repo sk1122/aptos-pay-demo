@@ -58,12 +58,15 @@ export const mintNFT = async (account: string, name: string) => {
   //     [],
   //   ]
   // );
-  const rawTxn = {
-    function: "0x45cf970c205f5e08c33b7551543f884d8109a7427fcbccce51588302c0baf1b9::create::mint",
-    type_arguments: [],
-    type: "script_payload",
-    arguments: [account, name]
-  };
+  const rawTxn = await builder.build(
+    "0x45cf970c205f5e08c33b7551543f884d8109a7427fcbccce51588302c0baf1b9::create::mint",
+    [],
+    [account, name]
+  );
 
-  return base58.encode(Buffer.from(JSON.stringify(rawTxn)));
+  const alice = new AptosAccount(Buffer.from(process.env.NEXT_PUBLIC_PRIVATE_KEY!, "hex"));
+console.log(account, name, alice.address().toString())
+  const transactionHash = await client.signAndSubmitTransaction(alice, rawTxn)
+
+  return transactionHash
 };

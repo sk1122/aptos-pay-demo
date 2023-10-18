@@ -1,3 +1,4 @@
+import { mintNFT } from "@/utils/mintNFT";
 import {
   decodeTransaction,
   generateTransferTransaction,
@@ -8,14 +9,15 @@ import { BCS, TxnBuilderTypes } from "aptos";
 import base58 from "bs58";
 import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
-import { QrReader } from "react-qr-reader";
+import QrReader from "react-qr-reader";
+import nacl from "tweetnacl"
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [image, setImage] = useState("");
-  const [parsed, setParsed] = useState<TransferURI>();
+  const [parsed, setParsed] = useState<any>();
   const [address, setAddress] = useState<any>(undefined);
 
   useEffect(() => {
@@ -36,6 +38,8 @@ export default function Home() {
 
     setAddress(account);
   };
+
+  console.log(process.env.NEXT_PUBLIC_PRIVATE_KEY)
 
   const pay = async () => {
     const p = parsed as any;
@@ -62,49 +66,79 @@ export default function Home() {
 
       const signature = await w.aptos.signMessage(message)
 
-      alert(JSON.stringify(signature))
+      if(nacl.sign.detached.verify(Buffer.from(signature.fullMessage), Buffer.from(signature.signature, "hex"), Buffer.from(address.publicKey.slice(2), "hex"))) {
+        const tx = await mintNFT(p.receiver, p.data)
+
+        alert(`Your NFT is minted at -> ${tx}`)
+      }
     }
+  };
+
+  let handleScan = (data: any) => {
+    if (data) {
+      setUrl(data);
+    }
+  };
+
+  let handleError = (err: any) => {
+    alert(err);
   };
 
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-center space-y-10 p-24 ${inter.className}`}
+      className={`flex min-h-screen items-center justify-center space-x-10 p-24 ${inter.className}`}
     >
-      <QrReader
-        containerStyle={{ width: "50%", height: "50%" }}
-        onResult={(result, error) => {
-          if (!!result) {
-            setUrl(result.getText());
-          }
+      <div className="w-full h-full flex justify-center items-center">
+        <QrReader
+          delay={300}
+          onError={handleError}
+          onScan={handleScan}
+          style={{ width: "100%" }}
+          facingMode="environment"
+        />
+      </div>
+      <div className="w-full h-full flex justify-start flex-col items-center space-y-10">
+        {parsed && 
+          <div className="space-y-3 flex justify-center items-start flex-col">
+            <h1 className="text-3xl font-bold">Aptos Pay Request</h1>
+            <div>
+              <p>Receiver - {parsed.receiver}</p>
+              <p>Message - {parsed.message}</p>
+              <p>Label - {parsed.label}</p>
 
-          if (!!error) {
-            console.info(error);
-          }
-        }}
-        //this is facing mode : "environment " it will open backcamera of the smartphone and if not found will
-        // open the front camera
-        constraints={{ facingMode: "environment" }}
-      />
-      {parsed && <p>Parsed Data - {JSON.stringify(parsed)}</p>}
+              {parsed.transaction && <p>Transaction - {parsed.transaction}</p>}
 
-      {!address && (
-        <div
-          className="cursor-pointer border p-3 rounded-xl"
-          onClick={() => connectAptos()}
-        >
-          Connect Petra
+              {parsed.token && <p>Token - {parsed.token}</p>}
+              {parsed.amount && <p>Amount - {parsed.amount}</p>}
+
+              {parsed.data && <p>Sign Data - {parsed.data}</p>}
+              {parsed.nonce && <p>Nonce - {parsed.nonce}</p>}
+
+              {address && <p>Address - {address.address}</p>}
+            </div>
+          </div>
+        }
+
+        <div className="flex justify-center items-center flex-col space-y-5">
+          {!address && (
+            <div
+              className="cursor-pointer border p-3 rounded-xl hover:bg-white hover:text-black"
+              onClick={() => connectAptos()}
+            >
+              Connect Petra
+            </div>
+          )}
+
+          {address && url && (
+            <div
+              className="cursor-pointer border p-3 rounded-xl hover:bg-white hover:text-black"
+              onClick={() => pay()}
+            >
+              Execute
+            </div>
+          )}
         </div>
-      )}
-      {address && <p>Address - {address.address}</p>}
-
-      {address && url && (
-        <div
-          className="cursor-pointer border p-3 rounded-xl"
-          onClick={() => pay()}
-        >
-          Pay
-        </div>
-      )}
+      </div>
     </main>
   );
 }
