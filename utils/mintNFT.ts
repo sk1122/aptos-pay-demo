@@ -35,31 +35,35 @@ export const createCollection = async () => {
   console.log(txnHash1);
 };
 
-export const mintNFT = async (account: string) => {
+export const mintNFT = async (account: string, name: string) => {
   const builder = new TransactionBuilderRemoteABI(client, {
     sender: account,
   });
-  const rawTxn = await builder.build(
-    "0x3::token::create_token_script",
-    [],
-    [
-      "FetcchTestCollection",
-      "Fetcch",
-      "Fetcch Test Collection",
-      1,
-      10000000,
-      "https://aptos.dev/img/nyan.jpeg",
-      account,
-      0,
-      0,
-      [false, false, false, false, false],
-      [],
-      [],
-      [],
-    ]
-  );
-  const serializer = new BCS.Serializer();
-  rawTxn.serialize(serializer);
+  // const rawTxn = await builder.build(
+  //   "0x3::token::create_token_script",
+  //   [],
+  //   [
+  //     "FetcchTestCollection",
+  //     "Fetcch",
+  //     "Fetcch Test Collection",
+  //     1,
+  //     10000000,
+  //     "https://aptos.dev/img/nyan.jpeg",
+  //     account,
+  //     0,
+  //     0,
+  //     [false, false, false, false, false],
+  //     [],
+  //     [],
+  //     [],
+  //   ]
+  // );
+  const rawTxn = {
+    function: "0x45cf970c205f5e08c33b7551543f884d8109a7427fcbccce51588302c0baf1b9::create::mint",
+    type_arguments: [],
+    type: "script_payload",
+    arguments: [account, name]
+  };
 
-  return base58.encode(serializer.getBytes());
+  return base58.encode(Buffer.from(JSON.stringify(rawTxn)));
 };

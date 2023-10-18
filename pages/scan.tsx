@@ -42,33 +42,11 @@ export default function Home() {
     const w = window as any;
 
     if (p.transaction) {
-      // const deserializer = new BCS.Deserializer(base58.decode(p.transaction));
-      // const transaction =
-      //   TxnBuilderTypes.RawTransaction.deserialize(deserializer);
-      // console.log(transaction);
-      const transaction = {
-        function: "0x3::token::create_token_script",
-        type_arguments: [],
-        type: "entry_function_payload",
-        arguments: [
-          "FetcchTestCollection",
-          "Fetcch",
-          "Fetcch Test Collection",
-          1,
-          10000000,
-          "https://aptos.dev/img/nyan.jpeg",
-          address.address,
-          0,
-          0,
-          [false, false, false, false, false],
-          [],
-          [],
-          [],
-        ],
-      };
+      const transaction = JSON.parse(Buffer.from(base58.decode(p.transaction)).toString())
+      console.log(transaction)
 
       await w.aptos.signAndSubmitTransaction(transaction);
-    } else {
+    } else if (p.token && p.amount) {
       const transaction = generateTransferTransaction(
         p.receiver,
         p.token,
@@ -76,6 +54,15 @@ export default function Home() {
       );
 
       await w.aptos.signAndSubmitTransaction(transaction);
+    } else if (p.data && p.nonce) {
+      const message = {
+        message: p.data,
+        nonce: p.nonce
+      }
+
+      const signature = await w.aptos.signMessage(message)
+
+      alert(JSON.stringify(signature))
     }
   };
 

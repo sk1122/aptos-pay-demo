@@ -11,22 +11,25 @@ export default function Home() {
     receiver:
       "0x2d91309b5b07a8be428ccd75d0443e81542ffcd059d0ab380cefc552229b1a",
     chain_id: 1,
-    transaction: "",
+    data: "",
+    nonce: 1,
     message: "MESSAGE",
     label: "LABEL",
   };
 
   const [receiver, setReceiver] = useState("");
+  const [name, setName] = useState("");
 
   const [url, setUrl] = useState("");
   const [image, setImage] = useState("");
 
   const generate = async () => {
-    const mintData = await mintNFT(receiver);
+    const mintData = await mintNFT(receiver, name);
     const url = generateUrl({
       ...args,
       receiver,
-      transaction: mintData,
+      data: "Mint a NFT from Collection",
+      nonce: 1
     });
     setUrl(url);
     setImage(await generateQrCode(url));
@@ -47,6 +50,12 @@ export default function Home() {
           name="token"
           onChange={(e) => setReceiver(e.target.value)}
           placeholder="Enter token address"
+          className="p-3 border rounded-xl"
+        />
+        <input
+          name="name"
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter token name"
           className="p-3 border rounded-xl"
         />
       </div>
