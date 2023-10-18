@@ -10,7 +10,7 @@ import base58 from "bs58";
 import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import QrReader from "react-qr-reader";
-import nacl from "tweetnacl"
+import nacl from "tweetnacl";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +22,6 @@ export default function Home() {
 
   useEffect(() => {
     if (url) {
-      console.log(url);
       const parsed = parseUrl(url);
 
       setParsed(parsed);
@@ -39,15 +38,14 @@ export default function Home() {
     setAddress(account);
   };
 
-  console.log(process.env.NEXT_PUBLIC_PRIVATE_KEY)
-
   const pay = async () => {
     const p = parsed as any;
     const w = window as any;
 
     if (p.transaction) {
-      const transaction = JSON.parse(Buffer.from(base58.decode(p.transaction)).toString())
-      console.log(transaction)
+      const transaction = JSON.parse(
+        Buffer.from(base58.decode(p.transaction)).toString()
+      );
 
       await w.aptos.signAndSubmitTransaction(transaction);
     } else if (p.token && p.amount) {
@@ -61,15 +59,21 @@ export default function Home() {
     } else if (p.data && p.nonce) {
       const message = {
         message: p.data,
-        nonce: p.nonce
-      }
+        nonce: p.nonce,
+      };
 
-      const signature = await w.aptos.signMessage(message)
+      const signature = await w.aptos.signMessage(message);
 
-      if(nacl.sign.detached.verify(Buffer.from(signature.fullMessage), Buffer.from(signature.signature, "hex"), Buffer.from(address.publicKey.slice(2), "hex"))) {
-        const tx = await mintNFT(p.receiver, p.data)
+      if (
+        nacl.sign.detached.verify(
+          Buffer.from(signature.fullMessage),
+          Buffer.from(signature.signature, "hex"),
+          Buffer.from(address.publicKey.slice(2), "hex")
+        )
+      ) {
+        const tx = await mintNFT(p.receiver, p.data);
 
-        alert(`Your NFT is minted at -> ${tx}`)
+        alert(`Your NFT is minted at -> ${tx}`);
       }
     }
   };
@@ -98,7 +102,7 @@ export default function Home() {
         />
       </div>
       <div className="w-full h-full flex justify-start flex-col items-center space-y-10">
-        {parsed && 
+        {parsed && (
           <div className="space-y-3 flex justify-center items-start flex-col">
             <h1 className="text-3xl font-bold">Aptos Pay Request</h1>
             <div>
@@ -117,7 +121,7 @@ export default function Home() {
               {address && <p>Address - {address.address}</p>}
             </div>
           </div>
-        }
+        )}
 
         <div className="flex justify-center items-center flex-col space-y-5">
           {!address && (

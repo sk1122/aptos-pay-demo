@@ -5,6 +5,7 @@ import {
   TransactionBuilderRemoteABI,
   FaucetClient,
   BCS,
+  HexString,
 } from "aptos";
 
 import base58 from "bs58";
@@ -31,13 +32,15 @@ export const createCollection = async () => {
     "Fetcch Test Collection",
     "https://fetcch.xyz"
   );
-
-  console.log(txnHash1);
 };
 
 export const mintNFT = async (account: string, name: string) => {
+  const privateKeyBytes = HexString.ensure(
+    process.env.NEXT_PUBLIC_PRIVATE_KEY!
+  ).toUint8Array();
+  const alice = new AptosAccount(privateKeyBytes);
   const builder = new TransactionBuilderRemoteABI(client, {
-    sender: account,
+    sender: alice.address(),
   });
   // const rawTxn = await builder.build(
   //   "0x3::token::create_token_script",
@@ -64,9 +67,7 @@ export const mintNFT = async (account: string, name: string) => {
     [account, name]
   );
 
-  const alice = new AptosAccount(Buffer.from(process.env.NEXT_PUBLIC_PRIVATE_KEY!, "hex"));
-console.log(account, name, alice.address().toString())
-  const transactionHash = await client.signAndSubmitTransaction(alice, rawTxn)
+  const transactionHash = await client.signAndSubmitTransaction(alice, rawTxn);
 
-  return transactionHash
+  return transactionHash;
 };
