@@ -1,7 +1,11 @@
 import { generateUrl, TransferURI } from "@fetcch/aptos-pay";
 import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
-import QRCodeStyling, { Options as QRCodeStylingOptions, FileExtension } from "qr-code-styling";
+import QRCodeStyling, {
+  Options as QRCodeStylingOptions,
+  FileExtension,
+} from "qr-code-styling";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,16 +25,16 @@ const inter = Inter({ subsets: ["latin"] });
 
 const styles = {
   inputWrapper: {
-    margin: '20px 0',
-    display: 'flex',
-    justifyContent: 'space-between',
-    width: '100%',
+    margin: "20px 0",
+    display: "flex",
+    justifyContent: "space-between",
+    width: "100%",
   },
   inputBox: {
     flexGrow: 1,
     marginRight: 20,
   },
-}
+};
 
 const qrOptions: QRCodeStylingOptions = {
   width: 300,
@@ -44,19 +48,20 @@ const qrOptions: QRCodeStylingOptions = {
     crossOrigin: "anonymous",
     margin: 0,
   },
-}
+};
 
-const useQRCodeStyling = (options: QRCodeStylingOptions): QRCodeStyling | null => {
+const useQRCodeStyling = (
+  options: QRCodeStylingOptions
+): QRCodeStyling | null => {
   //Only do this on the client
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const QRCodeStylingLib = require('qr-code-styling')
-    const qrCodeStyling: QRCodeStyling = new QRCodeStylingLib(options)
-    return qrCodeStyling
+    const QRCodeStylingLib = require("qr-code-styling");
+    const qrCodeStyling: QRCodeStyling = new QRCodeStylingLib(options);
+    return qrCodeStyling;
   }
-  return null
-}
-
+  return null;
+};
 
 export default function Home() {
   const args: TransferURI = {
@@ -74,8 +79,8 @@ export default function Home() {
   const [amount, setAmount] = useState("");
   const [url, setUrl] = useState("");
   const [image, setImage] = useState<any>();
-  
-  const qrCode = useQRCodeStyling(qrOptions)
+
+  const qrCode = useQRCodeStyling(qrOptions);
   const ref = useRef(null);
 
   const generate = async () => {
@@ -83,28 +88,28 @@ export default function Home() {
       ...args,
       receiver,
       data: token,
-      nonce: 1
+      nonce: 1,
     });
     setUrl(url);
     // setImage(await generateQrCode(url));
   };
 
   useEffect(() => {
-    qrCode?.append(ref.current!)
-  }, [qrCode])
+    qrCode?.append(ref.current!);
+  }, [qrCode]);
 
   useEffect(() => {
     qrCode?.update({
-      data: url
-    })
-  }, [url])
+      data: url,
+    });
+  }, [url]);
 
   return (
     <main
       className={`flex min-h-screen flex-col items-start justify-start space-y-10 p-24 ${inter.className}`}
     >
       <div className="w-full flex justify-start items-start flex-col space-y-5">
-        <h1 className="text-5xl font-bold">Transfer - Aptos Pay Demo</h1>
+        <h1 className="text-5xl font-bold">Mint NFT - Aptos Pay Demo</h1>
         <p className="flex">
           Powered by{" "}
           <img src="/logo.svg" className="w-20	h-20 -translate-y-1/3" />
@@ -135,6 +140,12 @@ export default function Home() {
           >
             Generate URL
           </div>
+          <Link
+            href="/scan"
+            className="px-5 py-3 border text-center rounded-xl hover:bg-white hover:text-black cursor-pointer duration-300"
+          >
+            Scan
+          </Link>
         </div>
 
         <div className="w-full h-full flex justify-start items-center flex-col space-y-4">
